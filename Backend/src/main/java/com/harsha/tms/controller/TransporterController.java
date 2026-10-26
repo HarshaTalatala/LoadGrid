@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
 
 import com.harsha.tms.dto.request.TransporterRequestDTO;
 import com.harsha.tms.dto.request.UpdateTrucksRequestDTO;
@@ -28,7 +29,7 @@ public class TransporterController {
     }
 
     @PostMapping
-    public ResponseEntity<TransporterResponseDTO> createTransporter(@RequestBody TransporterRequestDTO request) {
+    public ResponseEntity<TransporterResponseDTO> createTransporter(@Valid @RequestBody TransporterRequestDTO request) {
         TransporterResponseDTO response = transporterService.createTransporter(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -42,7 +43,7 @@ public class TransporterController {
     @PutMapping("/{id}/trucks")
     public ResponseEntity<TransporterResponseDTO> updateTrucks(
             @PathVariable UUID id,
-            @RequestBody UpdateTrucksRequestDTO request) {
+            @Valid @RequestBody UpdateTrucksRequestDTO request) {
         TransporterResponseDTO response = transporterService.updateTrucks(id, request);
         return ResponseEntity.ok(response);
     }

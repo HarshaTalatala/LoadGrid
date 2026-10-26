@@ -1,6 +1,6 @@
-# TMS Frontend
+# LoadGrid Frontend
 
-A responsive React + TypeScript dashboard for the existing Spring Boot Transport Management System API.
+A responsive React + TypeScript dashboard for the LoadGrid Spring Boot transport operations API.
 
 ## Features
 - Logistics overview with load, bid, booking and transporter summaries

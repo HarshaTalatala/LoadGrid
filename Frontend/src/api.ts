@@ -53,18 +53,49 @@ const asArray = <T,>(data: unknown): T[] => {
   if (value && typeof value === "object" && "content" in value && Array.isArray((value as {content: unknown}).content)) return (value as {content: T[]}).content;
   return [];
 };
+const normalizeLoad = (raw: Record<string, unknown>): Load => ({
+  ...raw,
+  id: String(raw.id),
+  origin: String(raw.pickupLocation ?? ""),
+  destination: String(raw.deliveryLocation ?? ""),
+  price: Number(raw.offeredPrice ?? 0),
+  pickupDate: String(raw.pickupDate ?? ""),
+  deliveryDate: String(raw.deliveryDate ?? "")
+});
+const normalizeBid = (raw: Record<string, unknown>): Bid => ({
+  ...raw,
+  id: String(raw.bidId),
+  loadId: String(raw.loadId),
+  transporterId: String(raw.transporterId),
+  proposedRate: Number(raw.proposedRate ?? 0),
+  submittedAt: String(raw.submittedAt ?? "")
+});
+const normalizeBooking = (raw: Record<string, unknown>): Booking => ({
+  ...raw,
+  id: String(raw.bookingId),
+  loadId: String(raw.loadId),
+  bidId: String(raw.bidId),
+  transporterId: String(raw.transporterId),
+  finalRate: Number(raw.finalRate ?? 0),
+  bookedAt: String(raw.bookedAt ?? "")
+});
+const normalizeTransporter = (raw: Record<string, unknown>): Transporter => ({
+  ...raw,
+  id: String(raw.transporterId),
+  trucks: Array.isArray(raw.trucks) ? raw.trucks as Truck[] : []
+});
 
 export const api = {
   async loads(): Promise<Load[]> {
     if (DEMO_MODE) return wait([...demoLoads]);
-    return asArray<Load>(await request("/load?size=100&sort=datePosted,desc"));
+    return asArray<Record<string, unknown>>(await request("/load?size=100&sort=datePosted,desc")).map(normalizeLoad);
   },
   async createLoad(body: Record<string, unknown>): Promise<Load> {
     if (DEMO_MODE) {
       const created: Load = { ...body, id: `LD-${Math.floor(2100 + Math.random() * 800)}`, remainingTrucks: Number(body.trucksRequired || 1), status: "POSTED", datePosted: new Date().toISOString().slice(0, 10) };
       demoLoads = [created, ...demoLoads]; return wait(created);
     }
-    return unwrap<Load>(await request("/load", { method: "POST", body: JSON.stringify(body) }));
+    return normalizeLoad(unwrap<Record<string, unknown>>(await request("/load", { method: "POST", body: JSON.stringify(body) })));
   },
   async cancelLoad(id: string): Promise<void> {
     if (DEMO_MODE) { demoLoads = demoLoads.map(x => x.id === id ? {...x, status: "CANCELLED"} : x); return wait(undefined); }
@@ -72,11 +103,11 @@ export const api = {
   },
   async bids(): Promise<Bid[]> {
     if (DEMO_MODE) return wait([...demoBids]);
-    return asArray<Bid>(await request("/bid?size=100"));
+    return asArray<Record<string, unknown>>(await request("/bid")).map(normalizeBid);
   },
   async bestBids(loadId: string): Promise<Bid[]> {
     if (DEMO_MODE) return wait(demoBids.filter(b => b.loadId === loadId).sort((a,b) => Number(b.score || 0)-Number(a.score || 0)));
-    return asArray<Bid>(await request(`/load/${encodeURIComponent(loadId)}/best-bids`));
+    return asArray<Record<string, unknown>>(await request(`/load/${encodeURIComponent(loadId)}/best-bids`)).map(normalizeBid);
   },
   async rejectBid(id: string): Promise<void> {
     if (DEMO_MODE) { demoBids = demoBids.map(x => x.id === id ? {...x, status: "REJECTED"} : x); return wait(undefined); }
@@ -84,11 +115,11 @@ export const api = {
   },
   async createBid(body: Record<string, unknown>): Promise<Bid> {
     if (DEMO_MODE) { const item: Bid = {...body, id:`BD-${Math.floor(200 + Math.random()*700)}`, status:"PENDING", submittedAt:new Date().toISOString()}; demoBids=[item,...demoBids]; return wait(item); }
-    return unwrap<Bid>(await request("/bid", {method:"POST", body:JSON.stringify(body)}));
+    return normalizeBid(unwrap<Record<string, unknown>>(await request("/bid", {method:"POST", body:JSON.stringify(body)})));
   },
   async booking(id: string): Promise<Booking> {
     if (DEMO_MODE) { const item = demoBookings.find(x => x.id === id); if (!item) throw new Error("Booking not found in demo data."); return wait(item); }
-    return unwrap<Booking>(await request(`/booking/${encodeURIComponent(id)}`));
+    return normalizeBooking(unwrap<Record<string, unknown>>(await request(`/booking/${encodeURIComponent(id)}`)));
   },
   async cancelBooking(id: string): Promise<void> {
     if (DEMO_MODE) { demoBookings = demoBookings.map(x => x.id === id ? {...x,status:"CANCELLED"} : x); return wait(undefined); }
@@ -96,7 +127,7 @@ export const api = {
   },
   async transporter(id: string): Promise<Transporter> {
     if (DEMO_MODE) { const item = demoTransporters.find(x=>x.id===id); if (!item) throw new Error("Transporter not found in demo data."); return wait(item); }
-    return unwrap<Transporter>(await request(`/transporter/${encodeURIComponent(id)}`));
+    return normalizeTransporter(unwrap<Record<string, unknown>>(await request(`/transporter/${encodeURIComponent(id)}`)));
   },
   async updateTrucks(id: string, trucks: Truck[]): Promise<void> {
     if (DEMO_MODE) { demoTransporters = demoTransporters.map(x => x.id === id ? {...x, trucks} : x); return wait(undefined); }

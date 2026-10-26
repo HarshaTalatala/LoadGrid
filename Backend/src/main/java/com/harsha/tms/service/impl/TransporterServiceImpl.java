@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.harsha.tms.dto.request.TransporterRequestDTO;
 import com.harsha.tms.dto.request.UpdateTrucksRequestDTO;
 import com.harsha.tms.dto.response.TransporterResponseDTO;
+import com.harsha.tms.dto.response.TransporterResponseDTO.TruckResponseDTO;
 import com.harsha.tms.entity.Transporter;
 import com.harsha.tms.entity.Truck;
 import com.harsha.tms.exception.ResourceNotFoundException;
@@ -38,7 +39,8 @@ public class TransporterServiceImpl implements TransporterService {
         return new TransporterResponseDTO(
                 savedTransporter.getTransporterId(),
                 savedTransporter.getCompanyName(),
-                savedTransporter.getRating()
+                savedTransporter.getRating(),
+                List.of()
         );
     }
 
@@ -50,7 +52,8 @@ public class TransporterServiceImpl implements TransporterService {
         return new TransporterResponseDTO(
                 transporter.getTransporterId(),
                 transporter.getCompanyName(),
-                transporter.getRating()
+                transporter.getRating(),
+                toTruckResponses(truckRepository.findByTransporterTransporterId(transporterId))
         );
     }
 
@@ -74,7 +77,14 @@ public class TransporterServiceImpl implements TransporterService {
         return new TransporterResponseDTO(
                 transporter.getTransporterId(),
                 transporter.getCompanyName(),
-                transporter.getRating()
+                transporter.getRating(),
+                toTruckResponses(truckRepository.findByTransporterTransporterId(transporterId))
         );
+    }
+
+    private List<TruckResponseDTO> toTruckResponses(List<Truck> trucks) {
+        return trucks.stream()
+                .map(truck -> new TruckResponseDTO(truck.getId(), truck.getTruckType(), truck.getCount()))
+                .toList();
     }
 }
