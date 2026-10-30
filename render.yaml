@@ -10,4 +10,4 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: CORS_ALLOWED_ORIGINS
-        value: https://loadgrid.vercel.app
+        value: https://loadgrid.vercel.app,https://*.vercel.app,https://loadgrid.harshabuilds.tech

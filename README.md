@@ -69,7 +69,7 @@ The frontend is deployed separately on Vercel. Render only needs to run the Spri
 1. Create a Render PostgreSQL database and copy its internal JDBC connection details.
 2. In Render, choose **New > Blueprint** and connect this repository.
 3. Set `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD` on `loadgrid-api` from the Render PostgreSQL database.
-4. Set `CORS_ALLOWED_ORIGINS` to `https://loadgrid.vercel.app` (or the exact Vercel frontend URL).
+4. Set `CORS_ALLOWED_ORIGINS` to `https://loadgrid.vercel.app,https://*.vercel.app,https://loadgrid.harshabuilds.tech` to support the production Vercel domain, Vercel preview deployments, and the custom domain.
 5. Deploy the backend and copy its public HTTPS URL.
 6. In Vercel, set `VITE_API_BASE_URL` to the Render backend URL, then redeploy the frontend.
 
