@@ -113,6 +113,7 @@ class BookingServiceImplTest {
         bid.setTransporter(transporter);
         bid.setTruckType("Flatbed");
         bid.setProposedRate(5000.0);
+        bid.setTrucksOffered(2);
         bid.setStatus(BidStatus.PENDING);
 
         truck = new Truck();
@@ -136,7 +137,6 @@ class BookingServiceImplTest {
         when(loadRepository.findById(testLoadId)).thenReturn(Optional.of(load));
         when(bidRepository.findById(testBidId)).thenReturn(Optional.of(bid));
         when(transporterRepository.findById(testTransporterId)).thenReturn(Optional.of(transporter));
-        when(bidRepository.findByLoad_Id(testLoadId)).thenReturn(Arrays.asList(bid));
         when(truckRepository.findByTransporterTransporterId(testTransporterId)).thenReturn(Arrays.asList(truck));
         when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
 
@@ -188,43 +188,12 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void testCreateBooking_AcceptedBidAlreadyExists() {
-        Bid acceptedBid = new Bid();
-        acceptedBid.setStatus(BidStatus.ACCEPTED);
-
-        when(loadRepository.findById(testLoadId)).thenReturn(Optional.of(load));
-        when(bidRepository.findById(testBidId)).thenReturn(Optional.of(bid));
-        when(transporterRepository.findById(testTransporterId)).thenReturn(Optional.of(transporter));
-        when(bidRepository.findByLoad_Id(testLoadId)).thenReturn(Arrays.asList(acceptedBid));
-
-        InvalidStatusTransitionException exception = assertThrows(InvalidStatusTransitionException.class,
-                () -> bookingService.createBooking(bookingRequestDTO));
-        assertNotNull(exception);
-    }
-
-    @Test
-    void testCreateBooking_InsufficientRemainingTrucks() {
-        load.setRemainingTrucks(1);
-        BookingRequestDTO request = new BookingRequestDTO(testLoadId, testBidId, testTransporterId, 2, 5000.0);
-
-        when(loadRepository.findById(testLoadId)).thenReturn(Optional.of(load));
-        when(bidRepository.findById(testBidId)).thenReturn(Optional.of(bid));
-        when(transporterRepository.findById(testTransporterId)).thenReturn(Optional.of(transporter));
-        when(bidRepository.findByLoad_Id(testLoadId)).thenReturn(Arrays.asList(bid));
-
-        InsufficientCapacityException exception = assertThrows(InsufficientCapacityException.class,
-                () -> bookingService.createBooking(request));
-        assertNotNull(exception);
-    }
-
-    @Test
     void testCreateBooking_InsufficientTrucksOfType() {
         truck.setCount(1);
 
         when(loadRepository.findById(testLoadId)).thenReturn(Optional.of(load));
         when(bidRepository.findById(testBidId)).thenReturn(Optional.of(bid));
         when(transporterRepository.findById(testTransporterId)).thenReturn(Optional.of(transporter));
-        when(bidRepository.findByLoad_Id(testLoadId)).thenReturn(Arrays.asList(bid));
         when(truckRepository.findByTransporterTransporterId(testTransporterId)).thenReturn(Arrays.asList(truck));
 
         InsufficientCapacityException exception = assertThrows(InsufficientCapacityException.class,

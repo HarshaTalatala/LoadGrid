@@ -60,8 +60,17 @@ public class BookingServiceImpl implements BookingService {
             Bid bid = bidRepository.findById(request.bidId())
                     .orElseThrow(() -> new ResourceNotFoundException("Bid not found with id: " + request.bidId()));
 
-            var transporter = transporterRepository.findById(request.transporterId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Transporter not found with id: " + request.transporterId()));
+            if (bid.getStatus() != BidStatus.PENDING) {
+                throw new InvalidStatusTransitionException("Cannot book a bid that is not PENDING. Current status: " + bid.getStatus());
+            }
+
+            if (!bid.getTransporter().getTransporterId().equals(request.transporterId())) {
+                throw new ResourceNotFoundException("Transporter ID in request does not match the transporter who submitted the bid");
+            }
+
+            transporterRepository.findById(request.transporterId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Transporter not found with id: " + request.transporterId()));
 
             // Validate single-ACCEPTED-bid-per-load rule
             List<Bid> acceptedBids = bidRepository.findByLoad_Id(request.loadId()).stream()
@@ -70,6 +79,11 @@ public class BookingServiceImpl implements BookingService {
             if (!acceptedBids.isEmpty()) {
                 throw new InvalidStatusTransitionException(
                         "Load already has an accepted bid. Cannot accept multiple bids for the same load.");
+            }
+
+            if (request.allocatedTrucks() > bid.getTrucksOffered()) {
+                throw new InsufficientCapacityException("Allocated trucks cannot exceed trucks offered in bid. Requested: " +
+                        request.allocatedTrucks() + ", Offered: " + bid.getTrucksOffered());
             }
 
             if (request.allocatedTrucks() > load.getRemainingTrucks()) {
@@ -89,7 +103,7 @@ public class BookingServiceImpl implements BookingService {
                     break;
                 }
             }
-            
+
             if (availableTrucksOfType < request.allocatedTrucks()) {
                 throw new InsufficientCapacityException(
                         "Insufficient trucks of type " + bid.getTruckType() + ". Requested: " +
@@ -114,7 +128,7 @@ public class BookingServiceImpl implements BookingService {
             Booking booking = new Booking();
             booking.setLoad(load);
             booking.setBid(bid);
-            booking.setTransporter(transporter);
+            booking.setTransporter(bid.getTransporter());
             booking.setAllocatedTrucks(request.allocatedTrucks());
             booking.setFinalRate(request.finalRate());
             booking.setStatus(BookingStatus.CONFIRMED);
@@ -189,6 +203,9 @@ public class BookingServiceImpl implements BookingService {
 
         booking.setStatus(BookingStatus.CANCELLED);
         Booking savedBooking = bookingRepository.save(booking);
+
+        bid.setStatus(BidStatus.PENDING);
+        bidRepository.save(bid);
 
         return new BookingResponseDTO(
                 savedBooking.getBookingId(),

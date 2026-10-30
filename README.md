@@ -6,8 +6,8 @@ This workspace contains a Spring Boot API and a React/Vite frontend. The fronten
 
 ## Prerequisites
 
-- Java 21 (the Maven compiler target; Java 25 also works with the configured project)
-- Maven 3.8+ or the included Maven wrapper
+- Java 25 LTS
+- Maven 3.9+ or the included Maven wrapper
 - Node.js 18+ and npm
 - PostgreSQL 14+ for live integration
 

@@ -2,7 +2,7 @@
 
 [![Java](https://img.shields.io/badge/Java-25-orange?logo=java)](https://www.oracle.com/java/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4-green?logo=springboot)](https://spring.io/projects/spring-boot)
-[![Maven](https://img.shields.io/badge/Maven-3.8+-blue?logo=apachemaven)](https://maven.apache.org/)
+[![Maven](https://img.shields.io/badge/Maven-3.9%2B-blue?logo=apachemaven)](https://maven.apache.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
 ---
@@ -29,7 +29,7 @@ The **Transport Management System (TMS)** is a comprehensive backend application
 |-----------|-----------|---------|
 | **Language** | Java | 25 |
 | **Framework** | Spring Boot | 4.0 |
-| **Build Tool** | Maven | 3.8+ |
+| **Build Tool** | Maven | 3.9+ |
 | **Database** | PostgreSQL | 17+ |
 | **ORM** | JPA/Hibernate | Latest |
 | **Boilerplate** | Lombok | Latest |
@@ -171,7 +171,7 @@ The Swagger interface allows you to:
 ### Prerequisites
 
 - **Java 25** or higher installed
-- **Maven 3.8+** installed
+- **Maven 3.9+** installed
 - **PostgreSQL 17+** installed and running
 - **Git** for cloning the repository
 

@@ -3,6 +3,7 @@ package com.harsha.tms.exception.handler;
 import java.time.Instant;
 import java.util.stream.Collectors;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -62,6 +63,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleIllegalState(IllegalStateException ex,
                                                            HttpServletRequest request) {
         return buildResponseEntity(ex, request, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex,
+                                                                      HttpServletRequest request) {
+        return buildResponseEntity(new RuntimeException("Database constraint violation: " + ex.getMostSpecificCause().getMessage()), request, HttpStatus.CONFLICT);
     }
 
     private ResponseEntity<ErrorResponse> buildResponseEntity(Exception ex,
