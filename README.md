@@ -62,6 +62,15 @@ npm run build
 
 Demo mode is opt-in only (`VITE_DEMO_MODE=true`) and must not be used to represent a production integration.
 
-## Deployment and limitations
+## Deploy to Render with Docker
 
-Build `Frontend/dist` and deploy it to a static host with `VITE_API_BASE_URL` set to the HTTPS API origin before building. Deploy the backend with `.\mvnw.cmd package` and provide PostgreSQL variables plus an HTTPS-aware `CORS_ALLOWED_ORIGINS`. The current API has no authentication or authorization and exposes write operations; add access controls before public deployment.
+The frontend is deployed separately on Vercel. Render only needs to run the Spring Boot backend using Docker. The repository includes a backend Dockerfile and a [`render.yaml`](./render.yaml) Blueprint:
+
+1. Create a Render PostgreSQL database and copy its internal JDBC connection details.
+2. In Render, choose **New > Blueprint** and connect this repository.
+3. Set `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD` on `loadgrid-api` from the Render PostgreSQL database.
+4. Set `CORS_ALLOWED_ORIGINS` to the exact Vercel frontend URL, for example `https://your-app.vercel.app`.
+5. Deploy the backend and copy its public HTTPS URL.
+6. In Vercel, set `VITE_API_BASE_URL` to the Render backend URL, then redeploy the frontend.
+
+The backend Dockerfile uses Java 25, matching `pom.xml`, and listens on Render's `PORT` environment variable. The current API has no authentication or authorization and exposes write operations; add access controls before public deployment.

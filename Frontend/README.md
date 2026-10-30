@@ -41,9 +41,9 @@ For a hosted UI preview without a publicly accessible backend, set `VITE_DEMO_MO
 VITE_DEMO_MODE=true npm run build
 ```
 
-## Deploy
+## Deploy to Vercel
 
-Build with `npm run build` and deploy the generated `dist/` directory to Vercel, Netlify, Cloudflare Pages, or any static host. Set environment variables in the hosting dashboard before building.
+Deploy the `Frontend` directory as a Vercel project. Set `VITE_API_BASE_URL` to the public HTTPS URL of the Spring Boot backend deployed on Render, then redeploy the frontend. Also set `CORS_ALLOWED_ORIGINS` on Render to the exact Vercel URL.
 
 ## Important
 This frontend does not add authentication. The backend currently has no authentication/authorization, so do not expose mutation endpoints publicly until backend access controls are added. API DTO fields are aligned to the analyzed backend model; confirm request field names against `/swagger-ui/index.html` before final production use.
