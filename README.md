@@ -74,3 +74,15 @@ The frontend is deployed separately on Vercel. Render only needs to run the Spri
 6. In Vercel, set `VITE_API_BASE_URL` to the Render backend URL, then redeploy the frontend.
 
 The backend Dockerfile uses Java 25, matching `pom.xml`, and listens on Render's `PORT` environment variable. The current API has no authentication or authorization and exposes write operations; add access controls before public deployment.
+
+## Neon database
+
+The repository is linked to the Neon `production` branch through [`neon.ts`](./neon.ts). After authenticating with the Neon CLI, run:
+
+```powershell
+neon deploy
+```
+
+This pulls `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, and `NEON_BRANCH` into the ignored `.env.local` file. The backend Docker image uses the pooled `DATABASE_URL` automatically when `DB_URL` is not set. On Render, set `DATABASE_URL` to the Neon pooled connection string, or set `DB_URL` explicitly if using another PostgreSQL provider.
+
+For Vercel, keep the frontend configured with `VITE_API_BASE_URL` pointing to the Render backend. The frontend does not connect directly to Neon.

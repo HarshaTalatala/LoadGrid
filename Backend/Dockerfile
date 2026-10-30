@@ -16,4 +16,4 @@ COPY --from=build /workspace/target/TransportManagementSystem-0.0.1-SNAPSHOT.jar
 
 ENV JAVA_OPTS=""
 EXPOSE 8080
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "if [ -n \"${DATABASE_URL:-}\" ] && [ -z \"${DB_URL:-}\" ]; then db_url=\"${DATABASE_URL#*://}\"; db_credentials=\"${db_url%@*}\"; db_host=\"${db_url#*@}\"; export DB_USERNAME=\"${DB_USERNAME:-${db_credentials%%:*}}\"; export DB_PASSWORD=\"${DB_PASSWORD:-${db_credentials#*:}}\"; export DB_URL=\"jdbc:postgresql://${db_host}\"; fi; exec java $JAVA_OPTS -jar app.jar"]
